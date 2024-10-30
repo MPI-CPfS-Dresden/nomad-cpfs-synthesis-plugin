@@ -16,38 +16,36 @@
 # limitations under the License.
 #
 
-from structlog.stdlib import (
-    BoundLogger,
-)
-from nomad.metainfo import (
-    Package,
-    Quantity,
-    Section,
-    MEnum,
-    Datetime,
-    SubSection,
-)
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
-)
 from nomad.datamodel.data import (
-    EntryData,
     ArchiveSection,
+    EntryData,
 )
 from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
     SectionProperties,
 )
 from nomad.datamodel.metainfo.eln import (
-    SampleID,
+    ElementalComposition,
     Ensemble,
     Instrument,
-    ElementalComposition,
+    SampleID,
+)
+from nomad.metainfo import (
+    Datetime,
+    MEnum,
+    Package,
+    Quantity,
+    Section,
+    SubSection,
+)
+from structlog.stdlib import (
+    BoundLogger,
 )
 
 m_package = Package(name='CPFS SCHEMES')
 
-class CPFSFurnace(Instrument,EntryData):
+
+class CPFSFurnace(Instrument, EntryData):
     m_def = Section(
         a_eln=ELNAnnotation(
             properties=SectionProperties(
@@ -62,29 +60,29 @@ class CPFSFurnace(Instrument,EntryData):
             lane_width='600px',
         ),
     )
-    model=Quantity(
+    model = Quantity(
         type=str,
-        description='''
+        description="""
         The model type of the furnace.
-        ''',
+        """,
     )
-    material=Quantity(
+    material = Quantity(
         type=str,
-        description='''
+        description="""
         The material the furnace is made of.
-        '''
+        """,
     )
-    geometry=Quantity(
+    geometry = Quantity(
         type=str,
-        description='''
+        description="""
         The geometry of the furnace.
-        '''
+        """,
     )
-    heating=Quantity(
+    heating = Quantity(
         type=str,
-        description='''
+        description="""
         The heating type of the furnace.
-        '''
+        """,
     )
     name = Quantity(
         type=MEnum(
@@ -102,39 +100,40 @@ class CPFSFurnace(Instrument,EntryData):
     )
     lab_id = Quantity(
         type=str,
-        description='''An ID string that is unique at least for the lab that produced this
-            data.''',
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
         description='Any information that cannot be captured in the other fields.',
     )
+
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `CPFSFurnace` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
-        super(CPFSFurnace, self).normalize(archive, logger)
+        """
+        super().normalize(archive, logger)
         if self.name:
-            furnace_list=[
-                ["Furnace1","FurnaceModel1","Steel","Box","Induction"],
-                ["Furnace2","FurnaceModel2","Cast Iron","Cube","Resistance"],
-                ["Furnace3","FurnaceModel3","Titanium","",""],
+            furnace_list = [
+                ['Furnace1', 'FurnaceModel1', 'Steel', 'Box', 'Induction'],
+                ['Furnace2', 'FurnaceModel2', 'Cast Iron', 'Cube', 'Resistance'],
+                ['Furnace3', 'FurnaceModel3', 'Titanium', '', ''],
             ]
             for li in furnace_list:
-                if self.name==li[0]:
-                    self.model=li[1]
-                    self.material=li[2]
-                    self.geometry=li[3]
-                    self.heating=li[4]
+                if self.name == li[0]:
+                    self.model = li[1]
+                    self.material = li[2]
+                    self.geometry = li[3]
+                    self.heating = li[4]
                     break
 
 
-class CPFSCrystalGrowthTube(ArchiveSection,EntryData):
+class CPFSCrystalGrowthTube(ArchiveSection, EntryData):
     m_def = Section(
         a_eln=ELNAnnotation(
             properties=SectionProperties(
@@ -148,35 +147,32 @@ class CPFSCrystalGrowthTube(ArchiveSection,EntryData):
             lane_width='600px',
         ),
     )
-    material=Quantity(
+    material = Quantity(
         type=str,
-        description='''
+        description="""
         The material of the tube.
-        ''',
+        """,
         a_eln={
-            "component": "StringEditQuantity",
+            'component': 'StringEditQuantity',
         },
     )
-    diameter=Quantity(
+    diameter = Quantity(
         type=float,
-        description='''
+        description="""
         The diameter of the tube.
-        ''',
-        a_eln={
-            "component": "NumberEditQuantity",
-            "defaultDisplayUnit": "millimeter"
-        },
-        unit="meter",
+        """,
+        a_eln={'component': 'NumberEditQuantity', 'defaultDisplayUnit': 'millimeter'},
+        unit='meter',
     )
-    filling=Quantity(
+    filling = Quantity(
         type=str,
-        description='''
+        description="""
         The filling of the tube.
-        ''',
+        """,
         a_eln={
-            "component": "StringEditQuantity",
+            'component': 'StringEditQuantity',
         },
-        )
+    )
     name = Quantity(
         type=MEnum(
             'TubeType1',
@@ -193,38 +189,39 @@ class CPFSCrystalGrowthTube(ArchiveSection,EntryData):
     )
     lab_id = Quantity(
         type=str,
-        description='''An ID string that is unique at least for the lab that produced this
-            data.''',
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
         description='Any information that cannot be captured in the other fields.',
     )
+
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `CPFSCrystalGrowthTube` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
-        super(CPFSCrystalGrowthTube, self).normalize(archive, logger)
+        """
+        super().normalize(archive, logger)
         if self.name:
-            furnace_list=[
-                ["TubeType1","Quartz","0.011","Vacuum"],
-                ["TubeType2","Tantalum","0.012","Iodine"],
-                ["TubeType3","Quartz","0.010",""],
+            furnace_list = [
+                ['TubeType1', 'Quartz', '0.011', 'Vacuum'],
+                ['TubeType2', 'Tantalum', '0.012', 'Iodine'],
+                ['TubeType3', 'Quartz', '0.010', ''],
             ]
             for li in furnace_list:
-                if self.name==li[0]:
-                    self.material=li[1]
-                    self.diameter=float(li[2])
-                    self.filling=li[3]
+                if self.name == li[0]:
+                    self.material = li[1]
+                    self.diameter = float(li[2])
+                    self.filling = li[3]
                     break
 
 
-class CPFSCrucible(ArchiveSection,EntryData):
+class CPFSCrucible(ArchiveSection, EntryData):
     m_def = Section(
         a_eln=ELNAnnotation(
             properties=SectionProperties(
@@ -237,25 +234,22 @@ class CPFSCrucible(ArchiveSection,EntryData):
             lane_width='600px',
         ),
     )
-    material=Quantity(
+    material = Quantity(
         type=str,
-        description='''
+        description="""
         The material of the crucible.
-        ''',
+        """,
         a_eln={
-            "component": "StringEditQuantity",
+            'component': 'StringEditQuantity',
         },
     )
-    diameter=Quantity(
+    diameter = Quantity(
         type=float,
-        description='''
+        description="""
         The diameter of the crucible.
-        ''',
-        a_eln={
-            "component": "NumberEditQuantity",
-            "defaultDisplayUnit": "millimeter"
-        },
-        unit="meter",
+        """,
+        a_eln={'component': 'NumberEditQuantity', 'defaultDisplayUnit': 'millimeter'},
+        unit='meter',
     )
     name = Quantity(
         type=MEnum(
@@ -273,45 +267,45 @@ class CPFSCrucible(ArchiveSection,EntryData):
     )
     lab_id = Quantity(
         type=str,
-        description='''An ID string that is unique at least for the lab that produced this
-            data.''',
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
         description='Any information that cannot be captured in the other fields.',
     )
+
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `CPFSCrucible` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
-        super(CPFSCrucible, self).normalize(archive, logger)
+        """
+        super().normalize(archive, logger)
         if self.name:
-            furnace_list=[
-                ["CrucibleType1","Al","0.011"],
-                ["CrucibleType2","Tantalum","0.012"],
-                ["CrucibleType3","Al","0.010"],
+            furnace_list = [
+                ['CrucibleType1', 'Al', '0.011'],
+                ['CrucibleType2', 'Tantalum', '0.012'],
+                ['CrucibleType3', 'Al', '0.010'],
             ]
             for li in furnace_list:
-                if self.name==li[0]:
-                    self.material=li[1]
-                    self.diameter=float(li[2])
+                if self.name == li[0]:
+                    self.material = li[1]
+                    self.diameter = float(li[2])
                     break
 
 
-
-class CPFSCrystal(Ensemble,EntryData):
+class CPFSCrystal(Ensemble, EntryData):
     sample_id = Quantity(
         type=str,
-        description='''
+        description="""
         Sample ID given by the grower.
-        ''',
+        """,
         a_eln={
-            "component": "StringEditQuantity",
+            'component': 'StringEditQuantity',
         },
     )
 
@@ -322,7 +316,7 @@ class CPFSCrystal(Ensemble,EntryData):
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
-        )
+        ),
     )
     final_crystal_length = Quantity(
         type=float,
@@ -336,25 +330,25 @@ class CPFSCrystal(Ensemble,EntryData):
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
-        )
+        ),
     )
     crystal_shape = Quantity(
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
-        )
+        ),
     )
     crystal_orientation = Quantity(
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
-        )
+        ),
     )
     safety_reactivity = Quantity(
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
-        )
+        ),
     )
     datetime = Quantity(
         type=Datetime,
@@ -362,8 +356,8 @@ class CPFSCrystal(Ensemble,EntryData):
     )
     lab_id = Quantity(
         type=str,
-        description='''An ID string that is unique at least for the lab that produced this
-            data.''',
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
@@ -372,26 +366,26 @@ class CPFSCrystal(Ensemble,EntryData):
     )
 
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `CPFSCrystal` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
-        super(CPFSCrystal, self).normalize(archive, logger)
+        """
+        super().normalize(archive, logger)
 
 
-class CPFSInitialSynthesisComponent(Ensemble,EntryData):
+class CPFSInitialSynthesisComponent(Ensemble, EntryData):
     datetime = Quantity(
         type=Datetime,
         description='The date and time associated with this section.',
     )
     lab_id = Quantity(
         type=str,
-        description='''An ID string that is unique at least for the lab that produced this
-            data.''',
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
@@ -411,112 +405,93 @@ class CPFSInitialSynthesisComponent(Ensemble,EntryData):
     weight = Quantity(
         type=float,
         unit='gram',
-        a_eln=ELNAnnotation(
-            component='NumberEditQuantity',
-            defaultDisplayUnit='gram'
-        ),
+        a_eln=ELNAnnotation(component='NumberEditQuantity', defaultDisplayUnit='gram'),
     )
     providing_company = Quantity(
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
-        )
+        ),
     )
+
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `CPFSInitialSynthesisComponent` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
-        super(CPFSInitialSynthesisComponent, self).normalize(archive, logger)
-        '''Figure out elemental composition from name if possible'''
-        all_elements = [
-                         'H', 'He', 'Li', 'Be', 'B', 'C', 'N', 'O', 'F', 'Ne', 'Na', 'Mg',
-                         'Al', 'Si', 'P', 'S', 'Cl', 'Ar', 'K', 'Ca', 'Sc', 'Ti', 'V',
-                         'Cr', 'Mn', 'Fe', 'Co', 'Ni', 'Cu', 'Zn', 'Ga', 'Ge', 'As',
-                         'Se', 'Br', 'Kr', 'Rb', 'Sr', 'Y', 'Zr', 'Nb', 'Mo', 'Tc',
-                         'Ru', 'Rh', 'Pd', 'Ag', 'Cd', 'In', 'Sn', 'Sb', 'Te', 'I',
-                         'Xe', 'Cs', 'Ba', 'La', 'Ce', 'Pr', 'Nd', 'Pm', 'Sm', 'Eu',
-                         'Gd', 'Tb', 'Dy', 'Ho', 'Er', 'Tm', 'Yb', 'Lu', 'Hf', 'Ta',
-                         'W', 'Re', 'Os', 'Ir', 'Pt', 'Au', 'Hg', 'Tl', 'Pb', 'Bi', 'Po',
-                         'At', 'Rn', 'Fr', 'Ra', 'Ac', 'Th', 'Pa', 'U', 'Np', 'Pu', 'Am',
-                         'Cm', 'Bk', 'Cf', 'Es', 'Fm', 'Md', 'No', 'Lr', 'Rf', 'Db', 'Sg',
-                         'Bh', 'Hs', 'Mt', 'Ds', 'Rg', 'Cn', 'Nh', 'Fl', 'Mc', 'Lv', 'Ts',
-                         'Og'
-            ]
+        """
+        super().normalize(archive, logger)
+        #        """Figure out elemental composition from name if possible"""
         if self.name:
-            elements=[]
-            nums=[]
-            tmp_atom=self.name[0]
-            tmp_number=""
-            for i in range(1,len(self.name)):
+            elements = []
+            nums = []
+            tmp_atom = self.name[0]
+            tmp_number = ''
+            for i in range(1, len(self.name)):
                 if self.name[i].isalpha():
                     if self.name[i].isupper():
                         elements.append(tmp_atom)
-                        if tmp_number=="": tmp_number="1"
+                        if tmp_number == '':
+                            tmp_number = '1'
                         nums.append(int(tmp_number))
-                        tmp_atom=self.name[i]
-                        tmp_number=""
+                        tmp_atom = self.name[i]
+                        tmp_number = ''
                     if self.name[i].islower():
-                        tmp_atom+=self.name[i]
-                if self.name[i] in "1234567890":
-                    tmp_number+=self.name[i]
+                        tmp_atom += self.name[i]
+                if self.name[i] in '1234567890':
+                    tmp_number += self.name[i]
             elements.append(tmp_atom)
-            if tmp_number=="": tmp_number="1"
+            if tmp_number == '':
+                tmp_number = '1'
             nums.append(int(tmp_number))
 
-            elemental_comp=[]
+            elemental_comp = []
             for i in range(len(nums)):
-                elemental=ElementalComposition(
-                    element=elements[i],
-                    atomic_fraction=float(nums[i])/sum(nums)
+                elemental = ElementalComposition(
+                    element=elements[i], atomic_fraction=float(nums[i]) / sum(nums)
                 )
                 elemental_comp.append(elemental)
-            self.elemental_composition=elemental_comp
+            self.elemental_composition = elemental_comp
+
 
 class CPFSRodInformation(ArchiveSection):
-    rod_preparation=Quantity(
+    rod_preparation = Quantity(
         type=str,
         description="""
         Any pre-treatment of the rod.
         """,
         a_eln={
-            "component": "StringEditQuantity",
+            'component': 'StringEditQuantity',
         },
     )
-    seed_rod_diameter=Quantity(
+    seed_rod_diameter = Quantity(
         type=float,
-        description='''
+        description="""
         The diameter of the seed rod.
-        ''',
-        a_eln={
-            "component": "NumberEditQuantity",
-            "defaultDisplayUnit": "millimeter"
-        },
-        unit="meter",
+        """,
+        a_eln={'component': 'NumberEditQuantity', 'defaultDisplayUnit': 'millimeter'},
+        unit='meter',
     )
-    feed_rod_diameter=Quantity(
+    feed_rod_diameter = Quantity(
         type=float,
-        description='''
+        description="""
         The diameter of the feed rod.
-        ''',
-        a_eln={
-            "component": "NumberEditQuantity",
-            "defaultDisplayUnit": "millimeter"
-        },
-        unit="meter",
+        """,
+        a_eln={'component': 'NumberEditQuantity', 'defaultDisplayUnit': 'millimeter'},
+        unit='meter',
     )
-    feed_rod_crystal_direction=Quantity(
+    feed_rod_crystal_direction = Quantity(
         type=str,
         description="""
         Crystal direction of the feed rod.
         """,
         a_eln={
-            "component": "StringEditQuantity",
+            'component': 'StringEditQuantity',
         },
     )
+
 
 m_package.__init_metainfo__()
