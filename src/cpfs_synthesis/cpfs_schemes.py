@@ -133,7 +133,7 @@ class CPFSFurnace(Instrument, EntryData):
                     break
 
 
-class CPFSCrystalGrowthTube(ArchiveSection, EntryData):
+class CPFSCrystalGrowthTube(EntryData, ArchiveSection):
     m_def = Section(
         a_eln=ELNAnnotation(
             properties=SectionProperties(
@@ -221,7 +221,7 @@ class CPFSCrystalGrowthTube(ArchiveSection, EntryData):
                     break
 
 
-class CPFSCrucible(ArchiveSection, EntryData):
+class CPFSCrucible(EntryData, ArchiveSection):
     m_def = Section(
         a_eln=ELNAnnotation(
             properties=SectionProperties(
