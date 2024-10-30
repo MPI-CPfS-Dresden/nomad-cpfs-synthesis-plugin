@@ -25,6 +25,9 @@ from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
     SectionProperties,
 )
+from nomad.datamodel.metainfo.basesections import (
+    ActivityStep,
+)
 from nomad.metainfo import (
     Package,
     Quantity,
@@ -33,7 +36,6 @@ from nomad.metainfo import (
 )
 from nomad_material_processing.crystal_growth import (
     CrystalGrowth,
-    CrystalGrowthStep,
 )
 from nomad_material_processing.utils import (
     create_archive,
@@ -57,7 +59,7 @@ configuration = config.get_plugin_entry_point(
 m_package = Package(name='MPI CPFS CZOCHRALSKI')
 
 
-class CPFSCzochralskiProcessStep(CrystalGrowthStep, EntryData):
+class CPFSCzochralskiProcessStep(ActivityStep, EntryData):
     """
     A step in the Czochralski Process.
     """

@@ -1,3 +1,0 @@
-description: A NOMAD plugin for Czochalski technique at MPI CPFS.
-name: MPI CPFS Czochalski
-plugin_type: schema

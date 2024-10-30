@@ -24,6 +24,9 @@ from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
     SectionProperties,
 )
+from nomad.datamodel.metainfo.basesections import (
+    ActivityStep,
+)
 from nomad.metainfo import (
     Package,
     Quantity,
@@ -32,7 +35,6 @@ from nomad.metainfo import (
 )
 from nomad_material_processing.crystal_growth import (
     CrystalGrowth,
-    CrystalGrowthStep,
 )
 from nomad_material_processing.utils import (
     create_archive,
@@ -56,7 +58,7 @@ configuration = config.get_plugin_entry_point(
 )
 
 
-class CPFSBridgmanTechniqueStep(CrystalGrowthStep, EntryData):
+class CPFSBridgmanTechniqueStep(ActivityStep, EntryData):
     """
     A step in the Bridgman technique. Contains temperature and pulling rate.
     """
