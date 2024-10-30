@@ -102,7 +102,7 @@ class CPFSCzochralskiProcessStep(CrystalGrowthStep, EntryData):
             normalized.
             logger (BoundLogger): A structlog logger.
         """
-        super(CPFSCzochralskiProcessStep, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CPFSCzochralskiProcess(CrystalGrowth, EntryData):
@@ -160,8 +160,8 @@ class CPFSCzochralskiProcess(CrystalGrowth, EntryData):
     )
     lab_id = Quantity(
         type=str,
-        description="""An ID string that is unique at least for the lab that produced this
-            data.""",
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
@@ -177,7 +177,7 @@ class CPFSCzochralskiProcess(CrystalGrowth, EntryData):
             normalized.
             logger (BoundLogger): A structlog logger.
         """
-        super(CPFSCzochralskiProcess, self).normalize(archive, logger)
+        super().normalize(archive, logger)
         self.location = 'MPI CPfS Dresden'
         if self.xlsx_file:
             import pandas as pd

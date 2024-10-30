@@ -85,7 +85,7 @@ class CPFSBridgmanTechniqueStep(CrystalGrowthStep, EntryData):
             normalized.
             logger (BoundLogger): A structlog logger.
         """
-        super(CPFSBridgmanTechniqueStep, self).normalize(archive, logger)
+        super().normalize(archive, logger)
 
 
 class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
@@ -143,8 +143,8 @@ class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
     )
     lab_id = Quantity(
         type=str,
-        description="""An ID string that is unique at least for the lab that produced this
-            data.""",
+        description="""An ID string that is unique at least for the lab that produced
+        this data.""",
     )
     description = Quantity(
         type=str,
@@ -160,7 +160,7 @@ class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
             normalized.
             logger (BoundLogger): A structlog logger.
         """
-        super(CPFSBridgmanTechnique, self).normalize(archive, logger)
+        super().normalize(archive, logger)
         self.location = 'MPI CPfS Dresden'
         if self.xlsx_file:
             import pandas as pd
