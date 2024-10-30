@@ -16,11 +16,14 @@
 # limitations under the License.
 #
 
-from nomad_material_processing.utils import (
-    create_archive,
+from nomad.config import config
+from nomad.datamodel.data import (
+    EntryData,
 )
-from structlog.stdlib import (
-    BoundLogger,
+from nomad.datamodel.metainfo.annotations import (
+    BrowserAnnotation,
+    ELNAnnotation,
+    SectionProperties,
 )
 from nomad.metainfo import (
     Package,
@@ -28,33 +31,37 @@ from nomad.metainfo import (
     Section,
     SubSection,
 )
-from nomad.datamodel.data import (
-    EntryData,
-)
-from nomad.datamodel.metainfo.annotations import (
-    ELNAnnotation,
-    BrowserAnnotation,
-    SectionProperties,
-)
 from nomad_material_processing.crystal_growth import (
     CrystalGrowth,
     CrystalGrowthStep,
 )
+from nomad_material_processing.utils import (
+    create_archive,
+)
+from structlog.stdlib import (
+    BoundLogger,
+)
 
-from cpfs_basesections.cpfs_schemes import (
-    CPFSFurnace,
-    CPFSCrystal,
+from cpfs_synthesis.cpfs_schemes import (
     CPFSCrucible,
+    CPFSCrystal,
     CPFSCrystalGrowthTube,
+    CPFSFurnace,
     CPFSInitialSynthesisComponent,
+)
+
+configuration = config.get_plugin_entry_point(
+    'cpfs_synthesis.schema_packages:schema_fluxgrowth_entry_point'
 )
 
 m_package = Package(name='MPI CPFS FLUX GROWTH ZONE')
 
-class CPFSFluxGrowthProcessStep(CrystalGrowthStep,EntryData):
-    '''
+
+class CPFSFluxGrowthProcessStep(CrystalGrowthStep, EntryData):
+    """
     A step in the Flux Growth Process.
-    '''
+    """
+
     process_time = Quantity(
         type=float,
         unit='second',
@@ -62,7 +69,7 @@ class CPFSFluxGrowthProcessStep(CrystalGrowthStep,EntryData):
         a_eln=ELNAnnotation(
             component='NumberEditQuantity',
             defaultDisplayUnit='hour',
-        )
+        ),
     )
     temperature = Quantity(
         type=float,
@@ -71,26 +78,28 @@ class CPFSFluxGrowthProcessStep(CrystalGrowthStep,EntryData):
         a_eln=ELNAnnotation(
             component='NumberEditQuantity',
             defaultDisplayUnit='celsius',
-        )
+        ),
     )
+
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `FluxGrowthProcessStep` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
+        """
         super(CPFSFluxGrowthProcessStep, self).normalize(archive, logger)
 
 
 class CPFSFluxGrowthProcess(CrystalGrowth, EntryData):
-    '''
+    """
     Application definition section for a FluxGrowthProcess at MPI CPFS.
-    '''
+    """
+
     m_def = Section(
-        links=[""],
+        links=[''],
         a_eln=ELNAnnotation(
             properties=SectionProperties(
                 order=[
@@ -127,24 +136,20 @@ class CPFSFluxGrowthProcess(CrystalGrowth, EntryData):
         type=CPFSCrystal,
         a_eln=ELNAnnotation(
             component='ReferenceEditQuantity',
-        )
+        ),
     )
     xlsx_file = Quantity(
         type=str,
-        description='''
+        description="""
         The xlsx file with data (optional). (.xlsx file).
-        ''',
-        a_browser=BrowserAnnotation(
-            adaptor='RawFileAdaptor'
-        ),
-        a_eln=ELNAnnotation(
-            component='FileEditQuantity'
-        ),
+        """,
+        a_browser=BrowserAnnotation(adaptor='RawFileAdaptor'),
+        a_eln=ELNAnnotation(component='FileEditQuantity'),
     )
     lab_id = Quantity(
         type=str,
-        description='''An ID string that is unique at least for the lab that produced this
-            data.''',
+        description="""An ID string that is unique at least for the lab that produced this
+            data.""",
     )
     description = Quantity(
         type=str,
@@ -152,68 +157,74 @@ class CPFSFluxGrowthProcess(CrystalGrowth, EntryData):
     )
 
     def normalize(self, archive, logger: BoundLogger) -> None:
-        '''
+        """
         The normalizer for the `FluxGrowthProcess` class.
 
         Args:
             archive (EntryArchive): The archive containing the section that is being
             normalized.
             logger (BoundLogger): A structlog logger.
-        '''
+        """
         super(CPFSFluxGrowthProcess, self).normalize(archive, logger)
-        self.location="MPI CPfS Dresden"
+        self.location = 'MPI CPfS Dresden'
         if self.xlsx_file:
             import pandas as pd
+
             with archive.m_context.raw_file(self.xlsx_file, 'r') as xlsx:
-                inp=pd.read_csv(xlsx)
-                if inp.loc[2][1].split()[1]=="CPFSFluxGrowth":
-                    self.name=str(inp.loc[10][2])
+                inp = pd.read_csv(xlsx)
+                if inp.loc[2][1].split()[1] == 'CPFSFluxGrowth':
+                    self.name = str(inp.loc[10][2])
                     self.furnace = CPFSFurnace(name=str(inp.loc[13][2]))
                     self.crucible = CPFSCrucible(name=str(inp.loc[14][2]))
                     self.tube = CPFSCrystalGrowthTube(name=str(inp.loc[15][2]))
-                    self.furnace.normalize(archive,logger)
-                    time_tmp=[]
-                    temp_tmp=[]
+                    self.furnace.normalize(archive, logger)
+                    time_tmp = []
+                    temp_tmp = []
                     for i in range(20):
-                        if not pd.isna(inp.loc[29+i])[1]:
-                            time_tmp.append(float(inp.loc[29+i][1])*60*60)
-                            temp_tmp.append(float(inp.loc[29+i][2])+273.15)
-                    step=[]
-                    step.append(CPFSFluxGrowthProcessStep(
-                        process_time=time_tmp,
-                        temperature=temp_tmp,
-                                                        ))
+                        if not pd.isna(inp.loc[29 + i])[1]:
+                            time_tmp.append(float(inp.loc[29 + i][1]) * 60 * 60)
+                            temp_tmp.append(float(inp.loc[29 + i][2]) + 273.15)
+                    step = []
+                    step.append(
+                        CPFSFluxGrowthProcessStep(
+                            process_time=time_tmp,
+                            temperature=temp_tmp,
+                        )
+                    )
                     self.steps = step
-                    components=[]
+                    components = []
                     for i in range(5):
-                        if not pd.isna(inp.loc[20+i][1]):
+                        if not pd.isna(inp.loc[20 + i][1]):
                             single_component = CPFSInitialSynthesisComponent(
-                                name=str(inp.loc[20+i][1]),
-                                state=str(inp.loc[20+i][2]),
-                                weight=float(inp.loc[20+i][3]),
-                                providing_company=str(inp.loc[20+i][4]),
+                                name=str(inp.loc[20 + i][1]),
+                                state=str(inp.loc[20 + i][2]),
+                                weight=float(inp.loc[20 + i][3]),
+                                providing_company=str(inp.loc[20 + i][4]),
                             )
-                            single_component.normalize(archive,logger)
-                            components.append(single_component
-                            )
+                            single_component.normalize(archive, logger)
+                            components.append(single_component)
                     self.initial_materials = components
                     crystal_ref = create_archive(
                         CPFSCrystal(
-                            name = str(inp.loc[51][2]) + "_" + str(inp.loc[52][2]),
-                            sample_id = str(inp.loc[51][2]),
-                            achieved_composition = str(inp.loc[52][2]),
-                            final_crystal_length = float(inp.loc[53][2])/1000,
-                            single_poly = str(inp.loc[54][2]),
-                            crystal_shape = str(inp.loc[55][2]),
-                            crystal_orientation = str(inp.loc[56][2]),
-                            safety_reactivity = str(inp.loc[57][2]),
-                            description = str(inp.loc[58][2]),
+                            name=str(inp.loc[51][2]) + '_' + str(inp.loc[52][2]),
+                            sample_id=str(inp.loc[51][2]),
+                            achieved_composition=str(inp.loc[52][2]),
+                            final_crystal_length=float(inp.loc[53][2]) / 1000,
+                            single_poly=str(inp.loc[54][2]),
+                            crystal_shape=str(inp.loc[55][2]),
+                            crystal_orientation=str(inp.loc[56][2]),
+                            safety_reactivity=str(inp.loc[57][2]),
+                            description=str(inp.loc[58][2]),
                         ),
                         archive,
-                        str(inp.loc[51][2]) + "_" + str(inp.loc[52][2]) + "_CPFSCrystal.archive.json"
+                        str(inp.loc[51][2])
+                        + '_'
+                        + str(inp.loc[52][2])
+                        + '_CPFSCrystal.archive.json',
                     )
                     self.resulting_crystal = crystal_ref
                 else:
-                    self.xlsx_file="Not a valid CPFSFluxGrowthProcess template."
+                    self.xlsx_file = 'Not a valid CPFSFluxGrowthProcess template.'
+
 
 m_package.__init_metainfo__()
