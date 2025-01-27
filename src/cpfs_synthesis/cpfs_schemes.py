@@ -22,13 +22,13 @@ from nomad.datamodel.data import (
 )
 from nomad.datamodel.metainfo.annotations import (
     ELNAnnotation,
+    ELNComponentEnum,
     SectionProperties,
 )
 from nomad.datamodel.metainfo.eln import (
     ElementalComposition,
     Ensemble,
     Instrument,
-    SampleID,
 )
 from nomad.metainfo import (
     Datetime,
@@ -36,7 +36,6 @@ from nomad.metainfo import (
     Package,
     Quantity,
     Section,
-    SubSection,
 )
 from structlog.stdlib import (
     BoundLogger,
@@ -138,24 +137,21 @@ class CPFSCrystalGrowthTube(EntryData, ArchiveSection):
         a_eln=ELNAnnotation(
             properties=SectionProperties(
                 order=[
-                    'name',
-                    'material',
                     'diameter',
-                    'filling',
                 ],
             ),
             lane_width='600px',
         ),
     )
-    material = Quantity(
-        type=str,
-        description="""
-        The material of the tube.
-        """,
-        a_eln={
-            'component': 'StringEditQuantity',
-        },
-    )
+    # material = Quantity(
+    #     type=str,
+    #     description="""
+    #     The material of the tube.
+    #     """,
+    #     a_eln={
+    #         'component': 'StringEditQuantity',
+    #     },
+    # )
     diameter = Quantity(
         type=float,
         description="""
@@ -164,34 +160,42 @@ class CPFSCrystalGrowthTube(EntryData, ArchiveSection):
         a_eln={'component': 'NumberEditQuantity', 'defaultDisplayUnit': 'millimeter'},
         unit='meter',
     )
-    filling = Quantity(
-        type=str,
+    length = Quantity(
+        type=float,
         description="""
-        The filling of the tube.
+        The diameter of the tube.
         """,
-        a_eln={
-            'component': 'StringEditQuantity',
-        },
+        a_eln={'component': 'NumberEditQuantity', 'defaultDisplayUnit': 'millimeter'},
+        unit='meter',
     )
-    name = Quantity(
-        type=MEnum(
-            'TubeType1',
-            'TubeType2',
-            'TubeType3',
-        ),
-        a_eln=ELNAnnotation(
-            component='EnumEditQuantity',
-        ),
-    )
-    datetime = Quantity(
-        type=Datetime,
-        description='The date and time associated with this section.',
-    )
-    lab_id = Quantity(
-        type=str,
-        description="""An ID string that is unique at least for the lab that produced
-        this data.""",
-    )
+    # filling = Quantity(
+    #     type=str,
+    #     description="""
+    #     The filling of the tube.
+    #     """,
+    #     a_eln={
+    #         'component': 'StringEditQuantity',
+    #     },
+    # )
+    # name = Quantity(
+    #     type=MEnum(
+    #         'TubeType1',
+    #         'TubeType2',
+    #         'TubeType3',
+    #     ),
+    #     a_eln=ELNAnnotation(
+    #         component='EnumEditQuantity',
+    #     ),
+    # )
+    # datetime = Quantity(
+    #     type=Datetime,
+    #     description='The date and time associated with this section.',
+    # )
+    # lab_id = Quantity(
+    #     type=str,
+    #     description="""An ID string that is unique at least for the lab that produced
+    #     this data.""",
+    # )
     description = Quantity(
         type=str,
         description='Any information that cannot be captured in the other fields.',
@@ -207,18 +211,18 @@ class CPFSCrystalGrowthTube(EntryData, ArchiveSection):
             logger (BoundLogger): A structlog logger.
         """
         super().normalize(archive, logger)
-        if self.name:
-            furnace_list = [
-                ['TubeType1', 'Quartz', '0.011', 'Vacuum'],
-                ['TubeType2', 'Tantalum', '0.012', 'Iodine'],
-                ['TubeType3', 'Quartz', '0.010', ''],
-            ]
-            for li in furnace_list:
-                if self.name == li[0]:
-                    self.material = li[1]
-                    self.diameter = float(li[2])
-                    self.filling = li[3]
-                    break
+        # if self.name:
+        #     furnace_list = [
+        #         ['TubeType1', 'Quartz', '0.011', 'Vacuum'],
+        #         ['TubeType2', 'Tantalum', '0.012', 'Iodine'],
+        #         ['TubeType3', 'Quartz', '0.010', ''],
+        #     ]
+        #     for li in furnace_list:
+        #         if self.name == li[0]:
+        #             self.material = li[1]
+        #             self.diameter = float(li[2])
+        #             self.filling = li[3]
+        #             break
 
 
 class CPFSCrucible(EntryData, ArchiveSection):
@@ -308,10 +312,18 @@ class CPFSCrystal(Ensemble, EntryData):
             'component': 'StringEditQuantity',
         },
     )
-
-    internal_sample_id = SubSection(
-        section_def=SampleID,
+    image_of_crystals = Quantity(
+        type=str,
+        description='Images of the resulting crystals.',
+        a_browser={'adaptor': 'RawFileAdaptor'},
+        a_eln=ELNAnnotation(
+            component=ELNComponentEnum.FileEditQuantity,
+        ),
     )
+
+    # internal_sample_id = SubSection(
+    #     section_def=SampleID,
+    # )
     achieved_composition = Quantity(
         type=str,
         a_eln=ELNAnnotation(
@@ -319,14 +331,6 @@ class CPFSCrystal(Ensemble, EntryData):
         ),
     )
     final_crystal_length = Quantity(
-        type=float,
-        unit='meter',
-        a_eln=ELNAnnotation(
-            component='NumberEditQuantity',
-            defaultDisplayUnit='millimeter',
-        ),
-    )
-    single_poly = Quantity(
         type=str,
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
@@ -358,11 +362,7 @@ class CPFSCrystal(Ensemble, EntryData):
         type=str,
         description="""An ID string that is unique at least for the lab that produced
         this data.""",
-    )
-    description = Quantity(
-        type=str,
-        description='Any information that cannot be captured in the other fields.',
-        a_eln=dict(component='StringEditQuantity', label='Remarks'),
+        default='MPI CPfS Dresden',
     )
 
     def normalize(self, archive, logger: BoundLogger) -> None:
@@ -392,14 +392,9 @@ class CPFSInitialSynthesisComponent(Ensemble, EntryData):
         description='Any information that cannot be captured in the other fields.',
     )
     state = Quantity(
-        type=MEnum(
-            'Powder',
-            'Polycrystal',
-            'Plate',
-            'Pieces',
-        ),
+        type=str,
         a_eln=ELNAnnotation(
-            component='EnumEditQuantity',
+            component='StringEditQuantity',
         ),
     )
     weight = Quantity(
@@ -412,6 +407,15 @@ class CPFSInitialSynthesisComponent(Ensemble, EntryData):
         a_eln=ELNAnnotation(
             component='StringEditQuantity',
         ),
+    )
+    purity = Quantity(
+        type=float,
+        a_eln=ELNAnnotation(component='NumberEditQuantity'),
+    )
+    description = Quantity(
+        type=str,
+        description='Any information that cannot be captured in the other fields.',
+        a_eln=dict(component='RichTextEditQuantity', props=dict(height=200)),
     )
 
     def normalize(self, archive, logger: BoundLogger) -> None:
