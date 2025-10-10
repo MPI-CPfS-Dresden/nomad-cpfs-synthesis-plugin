@@ -85,14 +85,7 @@ class CPFSFurnace(Instrument, EntryData):
         """,
     )
     name = Quantity(
-        type=MEnum(
-            'Furnace1',
-            'Furnace2',
-            'Furnace3',
-        ),
-        a_eln=ELNAnnotation(
-            component='EnumEditQuantity',
-        ),
+        type=str,
     )
     datetime = Quantity(
         type=Datetime,
@@ -174,14 +167,7 @@ class CPFSCrystalGrowthTube(EntryData, ArchiveSection):
         },
     )
     name = Quantity(
-        type=MEnum(
-            'TubeType1',
-            'TubeType2',
-            'TubeType3',
-        ),
-        a_eln=ELNAnnotation(
-            component='EnumEditQuantity',
-        ),
+        type=str,
     )
     datetime = Quantity(
         type=Datetime,
@@ -252,14 +238,7 @@ class CPFSCrucible(EntryData, ArchiveSection):
         unit='meter',
     )
     name = Quantity(
-        type=MEnum(
-            'CrucibleType1',
-            'CrucibleType2',
-            'CrucibleType3',
-        ),
-        a_eln=ELNAnnotation(
-            component='EnumEditQuantity',
-        ),
+        type=str,
     )
     datetime = Quantity(
         type=Datetime,

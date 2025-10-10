@@ -17,6 +17,7 @@
 #
 from nomad.config import config
 from nomad.datamodel.data import (
+    ArchiveSection,
     EntryData,
 )
 from nomad.datamodel.metainfo.annotations import (
@@ -32,9 +33,6 @@ from nomad.metainfo import (
     Quantity,
     Section,
     SubSection,
-)
-from nomad_material_processing.crystal_growth import (
-    CrystalGrowth,
 )
 from nomad_material_processing.utils import (
     create_archive,
@@ -56,6 +54,13 @@ m_package = Package(name='MPI CPFS BRIDGMAN')
 configuration = config.get_plugin_entry_point(
     'cpfs_synthesis.schema_packages:schema_bridgman_entry_point'
 )
+
+
+class TempSynthesisComponents(ArchiveSection):
+    initial_material = Quantity(type=str, shape='*')
+    amount = Quantity(type=float, unit='g', shape='*')
+    manufacturer = Quantity(type=str, shape='*')
+    pureness = Quantity(type=float, shape='*')
 
 
 class CPFSBridgmanTechniqueStep(ActivityStep, EntryData):
@@ -90,7 +95,8 @@ class CPFSBridgmanTechniqueStep(ActivityStep, EntryData):
         super().normalize(archive, logger)
 
 
-class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
+# class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
+class CPFSBridgmanTechnique(EntryData, ArchiveSection):
     """
     Application definition section for a Bridgman technique at MPI CPFS.
     """
@@ -107,6 +113,9 @@ class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
             ),
             lane_width='600px',
         ),
+    )
+    name = Quantity(
+        type=str,
     )
     method = Quantity(
         type=str,
@@ -152,6 +161,9 @@ class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
         type=str,
         description='Any information that cannot be captured in the other fields.',
     )
+    synthesis_components_read_in = SubSection(
+        section_def=TempSynthesisComponents,
+    )
 
     def normalize(self, archive, logger: BoundLogger) -> None:
         """
@@ -164,6 +176,18 @@ class CPFSBridgmanTechnique(CrystalGrowth, EntryData):
         """
         super().normalize(archive, logger)
         self.location = 'MPI CPfS Dresden'
+        if self.synthesis_components_read_in:
+            comp = []
+            for i in range(len(self.synthesis_components_read_in.initial_material)):
+                c = CPFSInitialSynthesisComponent(
+                    name=self.synthesis_components_read_in.initial_material[i],
+                    weight=self.synthesis_components_read_in.amount[i],
+                    providing_company=self.synthesis_components_read_in.manufacturer[i],
+                )
+                comp.append(c)
+            self.initial_materials = comp
+            self.synthesis_components_read_in = None
+
         if self.xlsx_file:
             import pandas as pd
 
